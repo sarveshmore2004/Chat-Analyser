@@ -125,6 +125,8 @@ def most_common_emojis(user , df):
     for msg in df['msg']:
         emojis.extend([c for c in msg if c in emoji.EMOJI_DATA])
 
+    if len(emojis) == 0:
+        return False
 
     counter = pd.DataFrame(Counter(emojis).most_common())
     counter = counter.rename(columns={counter.columns[0]:'Emoji' ,counter.columns[1]:'Count' })
@@ -164,6 +166,8 @@ def day_timeline(user , df):
 def monthly_timeline(user , df):
     if user != "Overall":
         df = df[df['username'] == user]
+
+
     timeline = df.groupby(['year', 'month_num', 'month']).count()['msg'].reset_index()
     # timeline['months'] =  timeline['month']
     # for i in range(timeline.shape[0]):

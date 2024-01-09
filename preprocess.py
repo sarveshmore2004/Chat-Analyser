@@ -2,16 +2,30 @@ import re
 import pandas as pd
 
 
-def preprocess_data(data):
 
-    pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}\s[ap]m\s-\s'
+def preprocess_data(data, mode):
+
+    if mode == '1d' or mode == '1m':
+        pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}\s[ap]m\s-\s'
+    else:
+        pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{1,2}\s-\s'
 
     msgs = re.split(pattern, data)[1:]
     dates = re.findall(pattern, data)
 
     df = pd.DataFrame({'msgs': msgs, 'dates': dates})
 
-    df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %I:%M %p - ', errors='coerce')
+
+
+    if mode == '1d':
+        df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %I:%M %p - ', errors='coerce')
+    elif mode == '2d':
+        df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %H:%M - ', errors='coerce')
+    elif mode == '1m':
+        df['dates'] = pd.to_datetime(df['dates'], format='%m/%d/%y, %I:%M %p - ', errors='coerce')
+    elif mode == '2m':
+        df['dates'] = pd.to_datetime(df['dates'], format='%m/%d/%y, %H:%M - ', errors='coerce')
+
     df['date'] = df['dates']
 
     df['only_date'] = df['date'].dt.date
@@ -61,6 +75,7 @@ def preprocess_data(data):
     #
     #     df['period'][i] = t1 + "-" + t2
 
-    df["day_name"] = df["day_name"].astype(pd.api.types.CategoricalDtype(categories=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]))
+    df["day_name"] = df["day_name"].astype(pd.api.types.CategoricalDtype(
+        categories=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]))
 
     return df

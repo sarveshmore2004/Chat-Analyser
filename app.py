@@ -1,5 +1,6 @@
 import streamlit as st
 from preprocess import preprocess_data
+# from preprocess import analyze_format
 import helper
 
 st.set_page_config(
@@ -28,7 +29,8 @@ st.sidebar.markdown("1. Click on the radio button next to your preferred analysi
 st.sidebar.markdown("**Step 3: Analyze Chat**")
 st.sidebar.markdown("1. Choose a user from the dropdown.")
 st.sidebar.markdown("2. Click 'Show Analytics'.")
-st.sidebar.markdown("3. Click on the expanders to reveal specific analysis insights. (Overview, Detailed Analysis, Temporal Analysis).")
+st.sidebar.markdown(
+    "3. Click on the expanders to reveal specific analysis insights. (Overview, Detailed Analysis, Temporal Analysis).")
 
 st.sidebar.markdown("**OR**")
 
@@ -41,8 +43,20 @@ uploaded_file = st.file_uploader("Choose a file")
 if 'last_processed_file' not in st.session_state:
     st.session_state['last_processed_file'] = None
 
-if 'selected_option' not in st.session_state:
-    st.session_state['selected_option'] = 0
+if 'last_date' not in st.session_state:
+    st.session_state['last_date'] = 'dd/mm/yyyy'
+
+if 'last_hour' not in st.session_state:
+    st.session_state['last_hour'] = '12hr'
+
+if 'key1' not in st.session_state:
+    st.session_state['key1'] = 0
+
+if 'key2' not in st.session_state:
+    st.session_state['key2'] = 100000
+
+if 'key3' not in st.session_state:
+    st.session_state['key3'] = 200000
 
 if 'model' not in st.session_state:
     st.session_state['model'] = None
@@ -50,38 +64,75 @@ if 'model' not in st.session_state:
 if 'accuracy' not in st.session_state:
     st.session_state['accuracy'] = None
 
+if uploaded_file is not None:
 
-if uploaded_file is not None :
-    # To read file as bytes:
+    # date_format = st.radio("Select a feature to proceed:", ('Chat Analysis', 'Predict Message Sender'), index=None, horizontal=True, key=st.session_state['key'])
+    # hour_format = st.radio("Select a feature to proceed:", ('Chat Analysis', 'Predict Message Sender'), index=None, horizontal=True, key=st.session_state['key'])
 
     if uploaded_file != st.session_state['last_processed_file']:
         bytes_data = uploaded_file.getvalue()
         data = bytes_data.decode("utf-8")
-        st.session_state.df = preprocess_data(data)
+        # dform , hform = analyze_format(data.split(" -", 1)[0])
+        # st.write(data.split(" -", 1)[0])
+
+
+        st.session_state.df = preprocess_data(data, '1d')
         st.session_state['last_processed_file'] = uploaded_file
-        st.session_state['selected_option'] += 1
+        st.session_state['last_date'] = 'dd/mm/yyyy'
+        st.session_state['last_hour'] = '12hr'
         st.session_state.accuracy = None
         st.session_state.model = None
+
+        st.session_state['key1'] += 1
+        st.session_state['key2'] += 1
+        st.session_state['key3'] += 1
         # st.write('processing')
 
+    st.divider()
+    st.subheader('Choose your Date-Time Format ')
+    date_format = st.radio("Select Date Format:", ('dd/mm/yyyy', 'mm/dd/yyyy'), index=0, horizontal=True,
+                           key=st.session_state['key2'])
+    hour_format = st.radio("Select Hour Format:", ('12hr', '24hr'), index=0, horizontal=True,
+                           key=st.session_state['key3'])
+
+    if date_format != st.session_state['last_date'] or hour_format != st.session_state['last_hour']:
+        # st.write('processing')
+        st.session_state['last_date'] = date_format
+        st.session_state['last_hour'] = hour_format
+        bytes_data = uploaded_file.getvalue()
+        data = bytes_data.decode("utf-8")
+        if date_format == 'dd/mm/yyyy' and hour_format == '24hr':
+            st.write('processing 1')
+            st.session_state.df = preprocess_data(data, '2d')
+        elif date_format == 'mm/dd/yyyy' and hour_format == '24hr':
+            st.write('processing 2')
+            st.session_state.df = preprocess_data(data, '2m')
+        elif date_format == 'mm/dd/yyyy' and hour_format == '12hr':
+            st.write('processing 3')
+            st.session_state.df = preprocess_data(data, '1m')
+        else:
+            st.write('processing 4')
+            st.session_state.df = preprocess_data(data, '1d')
 
     # if 'df' not in st.session_state:
     # df = preprocess_data(data)
-    # st.dataframe(df)
 
     user_list = st.session_state.df['username'].unique().tolist()
     user_list.insert(0, "Overall")
     st.divider()
 
+    # st.dataframe(st.session_state.df)
+
     st.header('Choose Your Feature')
 
     # Option buttons
-    # if st.session_state['selected_option'] is None:
-    # else:else 0 if st.session_state['selected_option'] == 'Chat Analysis' else 1
+    # if st.session_state['key'] is None:
+    # else:else 0 if st.session_state['key'] == 'Chat Analysis' else 1
     #     st.radio("Select a feature to proceed:", ('Chat Analysis', 'Predict Message Sender'), index=None, horizontal=True)
 
-    # st.session_state['selected_option'] = option
-    option = st.radio("Select a feature to proceed:", ('Chat Analysis', 'Predict Message Sender'), index=None, horizontal=True, key=st.session_state['selected_option'])
+    # st.session_state['key'] = option
+    option = st.radio("Select a feature to proceed:", ('Chat Analysis', 'Predict Message Sender'), index=None,
+                      horizontal=True, key=st.session_state['key1'])
     if option == 'Chat Analysis':
         st.divider()
         st.subheader('Chat Analysis')
@@ -90,27 +141,35 @@ if uploaded_file is not None :
             user_list
         )
         if st.button("Show Analysis"):
-            st.text("Click on the sections below to reveal specific analysis insights:")
-            st.caption("Note: The analysis is divided into three sections. If it's displaying less information, it's still loading.In the meantime, feel free to explore the loaded sections.")
-            with st.expander("Overview"):
+            st.divider()
+            st.subheader("Click on the three sections below to reveal specific analysis insights ")
+            # st.caption("Note: The analysis is divided into three sections. If it's displaying less information, it's still loading.In the meantime, feel free to explore the loaded sections.")
+
+            tab1, tab2, tab3 = st.tabs(["**Overview**", "**Detailed Analysis**", "**Temporal Analysis**"])
+            with tab1:
                 st.title("Overview")
                 st.divider()
-                total_messages, media_shared, total_words, total_emojis = helper.get_stats(selected_user, st.session_state.df)
+                total_messages, media_shared, total_words, total_emojis = helper.get_stats(selected_user,
+                                                                                           st.session_state.df)
 
                 cols = st.columns(4)
                 with cols[0]:
+                    # st.metric(label="Total Messages", value=total_messages)
                     st.subheader("Total Messages")
                     st.title(total_messages)
 
                 with cols[1]:
+                    # st.metric(label="Media Shared", value=media_shared)
                     st.subheader("Media Shared")
                     st.title(media_shared)
 
                 with cols[2]:
+                    # st.metric(label="Total Words", value=total_words)
                     st.subheader("Total Words")
                     st.title(total_words)
 
                 with cols[3]:
+                    # st.metric(label="**Total Emojis**", value=total_emojis)
                     st.subheader("Total Emojis")
                     st.title(total_emojis)
 
@@ -150,7 +209,7 @@ if uploaded_file is not None :
                         st.caption('All Users (Sorted by Deleted Message Count)')
                         st.dataframe(um)
 
-            with st.expander("Detailed Analysis"):
+            with tab2:
                 st.title("Detailed Analysis")
                 st.divider()
                 st.header("Most Frequent Words")
@@ -185,10 +244,9 @@ if uploaded_file is not None :
 
                 st.dataframe(helper.most_common_emojis(selected_user, st.session_state.df))
 
-            with st.expander("Temporal Analysis"):
-
-            # Monthly_timeline :
-                st.header("Temporal Analysis")
+            with tab3:
+                # Monthly_timeline :
+                st.title("Temporal Analysis")
                 st.divider()
                 st.header("Monthly Timeline")
                 month_timeline, month_df = helper.monthly_timeline(selected_user, st.session_state.df)
@@ -258,13 +316,13 @@ if uploaded_file is not None :
         user_input = st.text_input("Type your message and press 'Enter' to check the prediction:")
 
         if user_input:
-            prediction, probability = helper.predict(st.session_state.model , user_input)  # Replace with your prediction function
+            prediction, probability = helper.predict(st.session_state.model,
+                                                     user_input)  # Replace with your prediction function
             st.subheader('Prediction Result')
             st.write(f'🔍 The predicted sender is: **{prediction}**')
 
             st.subheader('Prediction Confidence')
             st.write(f'📊 Probability: {probability * 100:.2f}%')
-
 
 st.markdown('---')
 st.caption('WhatsApp Chat Analyzer v1.0 | Developed by Sarvesh_More')

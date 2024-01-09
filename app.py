@@ -1,7 +1,40 @@
+import pandas as pd
 import streamlit as st
 from preprocess import preprocess_data
 # from preprocess import analyze_format
 import helper
+
+import streamlit as st
+
+def sidebar_instructions():
+    st.sidebar.write("***Click the X button above to close the instructions guide.***")
+    st.sidebar.divider()
+    st.sidebar.title("Quick Start Guide")
+
+    st.sidebar.header("Step 1: Export & Upload Your Chat")
+    st.sidebar.write("- Export chat from WhatsApp as a .txt file.")
+    st.sidebar.write("- Tap ⋮ or ⋯ at the top of the screen, select 'More', then 'Export chat'.")
+    st.sidebar.write("- Upload the .txt file on the home page. Click 'Upload Chat File'.")
+
+    st.sidebar.header("Step 2: Select Date Format")
+    st.sidebar.write("- Choose the appropriate date format of your chat by selecting the corresponding radio button.")
+    st.sidebar.write("- If numerous errors occur, try selecting a format that results in zero errors.")
+
+    st.sidebar.header("Step 3: Select Analysis Option")
+    st.sidebar.write("- Click on the radio button next to your preferred analysis option.")
+
+    st.sidebar.header("Step 4: Analyze Chat")
+    st.sidebar.write("- Choose a user from the dropdown menu.")
+    st.sidebar.write("- Click 'Show Analytics'.")
+    st.sidebar.write("- Click on the expanders to reveal specific analysis insights (Overview, Detailed Analysis, Temporal Analysis).")
+
+    st.sidebar.write("OR")
+
+    st.sidebar.header("Step 4: Predict Message Sender")
+    st.sidebar.write("- Input a message to predict the sender and press Enter.")
+    st.sidebar.write("- Click 'Train the Model Again' to retrain if the accuracy is low.")
+
+
 
 st.set_page_config(
     page_title="ChatAnalyser",
@@ -15,48 +48,50 @@ st.title('WhatsApp Chat Analyser')
 st.text('Explore your chat data and predict message senders.')
 
 # st.set_sidebar_property("expanded", True)
+sidebar_instructions()
 
-# Sidebar
-st.sidebar.header("Quick Start Guide")
-st.sidebar.markdown("**Step 1: Export & Upload Your Chat**")
-st.sidebar.markdown("1. Export chat from WhatsApp as a .txt file.")
-st.sidebar.markdown("2. For Exporting the chat , Tap ⋮ or ⋯ at top of the screen, select 'More', then 'Export chat'.")
-st.sidebar.markdown("3. Upload the .txt file on home page. Click 'Upload Chat File'.")
-
-st.sidebar.markdown("**Step 2: Select Analysis Option**")
-st.sidebar.markdown("1. Click on the radio button next to your preferred analysis option.")
-
-st.sidebar.markdown("**Step 3: Analyze Chat**")
-st.sidebar.markdown("1. Choose a user from the dropdown.")
-st.sidebar.markdown("2. Click 'Show Analytics'.")
-st.sidebar.markdown(
-    "3. Click on the expanders to reveal specific analysis insights. (Overview, Detailed Analysis, Temporal Analysis).")
-
-st.sidebar.markdown("**OR**")
-
-st.sidebar.markdown("**Step 3: Predict Message Sender**")
-st.sidebar.markdown("1. Input message to predict sender and press Enter.")
-st.sidebar.markdown("2. Click 'Train the Model Again' to retrain if the accuracy is low.")
-
+#
+# # Sidebar
+# st.sidebar.header("Quick Start Guide")
+# st.sidebar.markdown("**Step 1: Export & Upload Your Chat**")
+# st.sidebar.markdown("1. Export chat from WhatsApp as a .txt file.")
+# st.sidebar.markdown("2. For Exporting the chat , Tap ⋮ or ⋯ at top of the screen, select 'More', then 'Export chat'.")
+# st.sidebar.markdown("3. Upload the .txt file on home page. Click 'Upload Chat File'.")
+#
+# st.sidebar.markdown("**Step 2: Select Analysis Option**")
+# st.sidebar.markdown("1. Click on the radio button next to your preferred analysis option.")
+#
+# st.sidebar.markdown("**Step 3: Analyze Chat**")
+# st.sidebar.markdown("1. Choose a user from the dropdown.")
+# st.sidebar.markdown("2. Click 'Show Analytics'.")
+# st.sidebar.markdown(
+#     "3. Click on the expanders to reveal specific analysis insights. (Overview, Detailed Analysis, Temporal Analysis).")
+#
+# st.sidebar.markdown("**OR**")
+#
+# st.sidebar.markdown("**Step 3: Predict Message Sender**")
+# st.sidebar.markdown("1. Input message to predict sender and press Enter.")
+# st.sidebar.markdown("2. Click 'Train the Model Again' to retrain if the accuracy is low.")
+st.text("")
 uploaded_file = st.file_uploader("Choose a file")
 
 if 'last_processed_file' not in st.session_state:
     st.session_state['last_processed_file'] = None
 
 if 'last_date' not in st.session_state:
-    st.session_state['last_date'] = 'dd/mm/yyyy'
-
-if 'last_hour' not in st.session_state:
-    st.session_state['last_hour'] = '12hr'
+    st.session_state['last_date'] = 'date/month/year'
+#
+# if 'last_hour' not in st.session_state:
+#     st.session_state['last_hour'] = '12hr'
 
 if 'key1' not in st.session_state:
     st.session_state['key1'] = 0
 
 if 'key2' not in st.session_state:
     st.session_state['key2'] = 100000
-
-if 'key3' not in st.session_state:
-    st.session_state['key3'] = 200000
+#
+# if 'key3' not in st.session_state:
+#     st.session_state['key3'] = 200000
 
 if 'model' not in st.session_state:
     st.session_state['model'] = None
@@ -76,52 +111,66 @@ if uploaded_file is not None:
         # st.write(data.split(" -", 1)[0])
 
 
-        st.session_state.df = preprocess_data(data, '1d')
+        st.session_state.df = preprocess_data(data , 'dmy')
         st.session_state['last_processed_file'] = uploaded_file
         st.session_state['last_date'] = 'dd/mm/yyyy'
-        st.session_state['last_hour'] = '12hr'
+        # st.session_state['last_hour'] = '12hr'
         st.session_state.accuracy = None
         st.session_state.model = None
 
         st.session_state['key1'] += 1
         st.session_state['key2'] += 1
-        st.session_state['key3'] += 1
+        # st.session_state['key3'] += 1
         # st.write('processing')
 
     st.divider()
-    st.subheader('Choose your Date-Time Format ')
-    date_format = st.radio("Select Date Format:", ('dd/mm/yyyy', 'mm/dd/yyyy'), index=0, horizontal=True,
+    st.header('Choose your Date-Time Format ')
+    st.text("")
+    date_format = st.radio("**Select Your Chat's Date Format:**", ('date/month/year', 'month/date/year' , 'year/month/date' , 'year/date/month'), index=0, horizontal=True,
                            key=st.session_state['key2'])
-    hour_format = st.radio("Select Hour Format:", ('12hr', '24hr'), index=0, horizontal=True,
-                           key=st.session_state['key3'])
-
-    if date_format != st.session_state['last_date'] or hour_format != st.session_state['last_hour']:
+    # hour_format = st.radio("Select Hour Format:", ('12hr', '24hr'), index=0, horizontal=True,
+    #                        key=st.session_state['key3'])
+    # or hour_format != st.session_state['last_hour']
+    if date_format != st.session_state['last_date']:
         # st.write('processing')
-        st.session_state['last_date'] = date_format
-        st.session_state['last_hour'] = hour_format
+        # st.session_state['last_date'] = date_format
+        # st.session_state['last_hour'] = hour_format
         bytes_data = uploaded_file.getvalue()
         data = bytes_data.decode("utf-8")
-        if date_format == 'dd/mm/yyyy' and hour_format == '24hr':
-            st.write('processing 1')
-            st.session_state.df = preprocess_data(data, '2d')
-        elif date_format == 'mm/dd/yyyy' and hour_format == '24hr':
-            st.write('processing 2')
-            st.session_state.df = preprocess_data(data, '2m')
-        elif date_format == 'mm/dd/yyyy' and hour_format == '12hr':
-            st.write('processing 3')
-            st.session_state.df = preprocess_data(data, '1m')
+        if date_format == 'date/month/year':
+            # st.write('processing 1')
+            st.session_state.df = preprocess_data(data, 'dmy')
+
+        elif date_format == 'month/date/year':
+            # st.write('processing 2')
+            st.session_state.df = preprocess_data(data, 'mdy')
+            # st.write(st.session_state.df['day'].isna().sum())
+
+        elif date_format == 'year/month/date':
+            # st.write('processing 3')
+            st.session_state.df = preprocess_data(data, 'ymd')
+            # st.write(st.session_state.df['day'].isna().sum())
+
+        elif date_format == 'year/date/month':
+            # st.write('processing 4')
+            st.session_state.df = preprocess_data(data, 'ydm')
+            # st.write(st.session_state.df['day'].isna().sum())
+
+        aaa = st.session_state.df['day'].isna().sum()
+        if aaa == 0:
+            st.write("***No errors detected. This option appears to be correct.***")
         else:
-            st.write('processing 4')
-            st.session_state.df = preprocess_data(data, '1d')
+            st.write(f"***Detected {aaa} errors. Please try a different option.***")
 
     # if 'df' not in st.session_state:
     # df = preprocess_data(data)
+    st.caption("You can also verify the date display for recent messages given below. If incorrect, please select a different option above.")
+    with st.expander("Verify Data "):
+        st.dataframe(st.session_state.df[['day' , 'month' , 'year' , 'hour' , 'minute', 'username' , 'msg']].tail(10))
 
     user_list = st.session_state.df['username'].unique().tolist()
     user_list.insert(0, "Overall")
     st.divider()
-
-    # st.dataframe(st.session_state.df)
 
     st.header('Choose Your Feature')
 
@@ -131,18 +180,19 @@ if uploaded_file is not None:
     #     st.radio("Select a feature to proceed:", ('Chat Analysis', 'Predict Message Sender'), index=None, horizontal=True)
 
     # st.session_state['key'] = option
-    option = st.radio("Select a feature to proceed:", ('Chat Analysis', 'Predict Message Sender'), index=None,
+    option = st.radio("**Select a feature to proceed:**", ('Chat Analysis', 'Predict Message Sender'), index=None,
                       horizontal=True, key=st.session_state['key1'])
     if option == 'Chat Analysis':
         st.divider()
         st.subheader('Chat Analysis')
         selected_user = st.selectbox(
-            "Select which user's analysis you want :",
+            "***Select which user's analysis you want :***",
             user_list
         )
         if st.button("Show Analysis"):
             st.divider()
-            st.subheader("Click on the three sections below to reveal specific analysis insights ")
+            st.write("***Click on the three sections below to reveal specific analysis insights :***")
+            # st.write("***Click on the three sections below to reveal specific analysis insights***")
             # st.caption("Note: The analysis is divided into three sections. If it's displaying less information, it's still loading.In the meantime, feel free to explore the loaded sections.")
 
             tab1, tab2, tab3 = st.tabs(["**Overview**", "**Detailed Analysis**", "**Temporal Analysis**"])
@@ -293,7 +343,7 @@ if uploaded_file is not None:
 
                 with col1:
                     st.caption("Message Distribution across Hours each Day")
-                    st.caption("Note: Lighter shades indicate high activity")
+                    st.caption("***Note: Lighter shades indicate high activity***")
                     st.pyplot(time_period_timeline)
                 with col2:
                     st.caption('Top Hours by Message Count')
@@ -312,8 +362,10 @@ if uploaded_file is not None:
         if st.button('Retrain Model'):
             st.session_state.accuracy, st.session_state.model = helper.predict_user_preprocess(st.session_state.df)
 
+        st.divider()
+
         st.header('Input your message')
-        user_input = st.text_input("Type your message and press 'Enter' to check the prediction:")
+        user_input = st.text_input("Type your message below and press 'Enter' or click '↲' to check the prediction:")
 
         if user_input:
             prediction, probability = helper.predict(st.session_state.model,

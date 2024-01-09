@@ -1,30 +1,60 @@
 import re
 import pandas as pd
+from dateutil import parser
 
 
+def parse_dates_with_fallback(dates, primary_format, fallback_format):
+    parsed_dates = pd.to_datetime(dates, format=primary_format, errors='coerce')
+    fallback_dates = pd.to_datetime(dates[parsed_dates.isna()], format=fallback_format, errors='coerce')
+    parsed_dates[parsed_dates.isna()] = fallback_dates
+    return parsed_dates
+def preprocess_data(data , mode):
 
-def preprocess_data(data, mode):
+    time_form = "12hr" if re.search(r'(?i)AM|PM', data.split(" - ", 1)[0]) else "24hr"
 
-    if mode == '1d' or mode == '1m':
-        pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{2}\s[ap]m\s-\s'
+    if time_form == "12hr":
+        pattern = '\d{1,4}[/.-]\d{1,4}[/.-]\d{1,4},\s\d{1,2}:\d{1,2}\s[aApP][mM]\s-\s'
     else:
-        pattern = '\d{1,2}/\d{1,2}/\d{2,4},\s\d{1,2}:\d{1,2}\s-\s'
+        pattern = '\d{1,4}[/.-]\d{1,4}[/.-]\d{1,4},\s\d{1,2}:\d{1,2}\s-\s'
 
     msgs = re.split(pattern, data)[1:]
     dates = re.findall(pattern, data)
 
     df = pd.DataFrame({'msgs': msgs, 'dates': dates})
 
+    # df['dates'] = df['dates'].apply(lambda x: parser.parse(x.replace(' ', ' ').replace(', ', ' ').replace(' - ', ' '), fuzzy=True , dayfirst=True))
 
+    if time_form == "12hr":
+        if mode == 'dmy':
+            df['dates'] = parse_dates_with_fallback(df['dates'], '%d/%m/%Y, %I:%M %p - ', '%d/%m/%y, %I:%M %p - ')
+            # df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %I:%M %p - ', errors='coerce')
+        elif mode == 'mdy':
+            df['dates'] = parse_dates_with_fallback(df['dates'], '%m/%d/%Y, %I:%M %p - ', '%m/%d/%y, %I:%M %p - ')
+            # df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %I:%M %p - ', errors='coerce')
+        elif mode == 'ymd':
+            df['dates'] = parse_dates_with_fallback(df['dates'], '%Y/%m/%d, %I:%M %p - ', '%y/%m/%d, %I:%M %p - ')
+            # df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %I:%M %p - ', errors='coerce')
+        elif mode == 'ydm':
+            df['dates'] = parse_dates_with_fallback(df['dates'], '%Y/%d/%m, %I:%M %p - ', '%y/%d/%m, %I:%M %p - ')
+    else:
+        if mode == 'dmy':
+            df['dates'] = parse_dates_with_fallback(df['dates'], '%d/%m/%Y, %H:%M - ', '%d/%m/%y, %H:%M - ')
+            # df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %H:%M - ', errors='coerce')
+        elif mode == 'mdy':
+            df['dates'] = parse_dates_with_fallback(df['dates'], '%m/%d/%Y, %H:%M - ', '%m/%d/%y, %H:%M - ')
+            # df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %H:%M - ', errors='coerce')
+        elif mode == 'ymd':
+            df['dates'] = parse_dates_with_fallback(df['dates'], '%Y/%m/%d, %H:%M - ', '%y/%m/%d, %H:%M - ')
+            # df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %H:%M - ', errors='coerce')
+        elif mode == 'ydm':
+            df['dates'] = parse_dates_with_fallback(df['dates'], '%Y/%d/%m, %H:%M - ', '%y/%d/%m, %H:%M - ')
 
-    if mode == '1d':
-        df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %I:%M %p - ', errors='coerce')
-    elif mode == '2d':
-        df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %H:%M - ', errors='coerce')
-    elif mode == '1m':
-        df['dates'] = pd.to_datetime(df['dates'], format='%m/%d/%y, %I:%M %p - ', errors='coerce')
-    elif mode == '2m':
-        df['dates'] = pd.to_datetime(df['dates'], format='%m/%d/%y, %H:%M - ', errors='coerce')
+    # elif mode == '2d':
+    #     df['dates'] = pd.to_datetime(df['dates'], format='%d/%m/%Y, %H:%M - ', errors='coerce')
+    # elif mode == '1m':
+    #     df['dates'] = pd.to_datetime(df['dates'], format='%m/%d/%y, %I:%M %p - ', errors='coerce')
+    # elif mode == '2m':
+    #     df['dates'] = pd.to_datetime(df['dates'], format='%m/%d/%y, %H:%M - ', errors='coerce')
 
     df['date'] = df['dates']
 

@@ -125,8 +125,8 @@ def most_common_emojis(user , df):
     for msg in df['msg']:
         emojis.extend([c for c in msg if c in emoji.EMOJI_DATA])
 
-    if len(emojis) == 0:
-        return False
+    if not emojis:
+        return pd.DataFrame()
 
     counter = pd.DataFrame(Counter(emojis).most_common())
     counter = counter.rename(columns={counter.columns[0]:'Emoji' ,counter.columns[1]:'Count' })

@@ -12,9 +12,10 @@ def sidebar_instructions():
     st.sidebar.title("Quick Start Guide")
 
     st.sidebar.header("Step 1: Export & Upload Your Chat")
-    st.sidebar.write("- Export chat from WhatsApp as a .txt file.")
-    st.sidebar.write("- Tap ⋮ or ⋯ at the top of the screen, select 'More', then 'Export chat'.")
-    st.sidebar.write("- Upload the .txt file on the home page. Click 'Upload Chat File'.")
+    st.sidebar.write("- Open the chat you want to export in the WhatsApp mobile app.")
+    st.sidebar.write("  - Tap ⋮ or ⋯, select 'More' > 'Export chat', choose 'Without Media', and save the file.")
+    st.sidebar.write("- Extract the .zip file to get the .txt file.")
+    st.sidebar.write("- Go to the home page, click 'Upload Chat File', and select the .txt file.")
 
     st.sidebar.header("Step 2: Select Date Format")
     st.sidebar.write("- Choose the appropriate date format of your chat by selecting the corresponding radio button.")

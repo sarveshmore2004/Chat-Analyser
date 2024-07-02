@@ -30,8 +30,8 @@ The WhatsApp Chat Analyzer is an interactive web application designed to analyze
 
 1. **Clone the repository**:
     ```sh
-    git clone https://github.com/yourusername/whatsapp-chat-analyzer.git
-    cd whatsapp-chat-analyzer
+    git clone git@github.com:sarveshmore2004/Chat-Analyser.git
+    cd Chat-Analyser
     ```
 
 2. **Install the required dependencies**:
